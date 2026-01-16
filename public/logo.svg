@@ -1,0 +1,33 @@
+<svg width="260" height="260" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1E88E5;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#43A047;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FB8C00;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Book Shape -->
+  <path d="M80 200 L80 380 Q80 400 100 400 L240 360 L240 180 L100 220 Q80 220 80 200Z"
+        fill="url(#grad1)" />
+  <path d="M432 200 L432 380 Q432 400 412 400 L272 360 L272 180 L412 220 Q432 220 432 200Z"
+        fill="url(#grad1)" />
+
+  <!-- Book Center Line -->
+  <path d="M256 180 L256 360" stroke="#0D47A1" stroke-width="6" />
+
+  <!-- Graduation Cap -->
+  <polygon points="256,110 120,160 256,210 392,160"
+           fill="#0D47A1" />
+  <rect x="236" y="210" width="40" height="25" fill="#0D47A1" />
+  <line x1="256" y1="110" x2="330" y2="70" stroke="#0D47A1" stroke-width="6" />
+  <circle cx="330" cy="70" r="8" fill="#0D47A1" />
+  <line x1="330" y1="70" x2="330" y2="115" stroke="#FBC02D" stroke-width="6" />
+  <circle cx="330" cy="125" r="10" fill="#FBC02D" />
+
+  <!-- Text -->
+  <text x="50%" y="460" font-family="Arial, sans-serif" font-size="70"
+        font-weight="700" text-anchor="middle" fill="#1E3A8A">
+    Edu<tspan fill="#43A047">Store</tspan>
+  </text>
+</svg>
