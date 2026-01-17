@@ -62,7 +62,7 @@ function App() {
 
   return (
     <SocketProvider>
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Toaster position="top-right" toastOptions={{
           className: 'text-sm font-medium',
           duration: 3000,

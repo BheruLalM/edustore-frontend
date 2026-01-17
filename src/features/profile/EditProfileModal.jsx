@@ -40,7 +40,10 @@ const EditProfileModal = ({ onClose, currentProfile }) => {
         try {
             // Upload Avatar if changed
             if (selectedFile) {
-                await dispatch(uploadUserAvatar(selectedFile)).unwrap();
+                await dispatch(uploadUserAvatar({
+                    file: selectedFile,
+                    localUrl: avatarPreview
+                })).unwrap();
             }
 
             // Update Profile Details

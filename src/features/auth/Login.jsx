@@ -157,7 +157,7 @@ const Login = () => {
                                 useOneTap
                                 theme="outline"
                                 shape="rectangular"
-                                width="100%"
+                                width={320}
                             />
                         </div>
                     </form>

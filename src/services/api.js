@@ -19,7 +19,7 @@ api.interceptors.response.use(
             originalRequest._retry = true;
 
             try {
-                // Attempt token refresh
+                // Attempt token refresh using a clean axios instance to avoid recursion
                 await axios.post(
                     `${import.meta.env.VITE_API_BASE_URL}/auth/refresh`,
                     {},
@@ -27,7 +27,7 @@ api.interceptors.response.use(
                 );
 
                 // Retry original request
-                return api.request(originalRequest);
+                return api(originalRequest);
             } catch (refreshError) {
                 // Refresh failed, notify the app to handle logout/redirect smoothly
                 window.dispatchEvent(new CustomEvent('unauthorized'));

@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create API instance pointing to Chat Server
 const chatApi = axios.create({
-    baseURL: 'http://localhost:3000/api', // Chat Server URL
+    baseURL: `${import.meta.env.VITE_CHAT_SERVICE_URL || 'http://localhost:3000'}/api`,
     withCredentials: true, // If needed for cookies, though we use Bearer token
     headers: {
         'Content-Type': 'application/json',

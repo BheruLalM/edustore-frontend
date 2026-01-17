@@ -145,10 +145,15 @@ export const toggleFollowUser = createAsyncThunk(
 // Update Profile
 export const updateUserProfile = createAsyncThunk(
     'profile/updateUserProfile',
-    async (profileData, { rejectWithValue }) => {
+    async (profileData, { dispatch, rejectWithValue }) => {
         try {
-            const response = await profileService.updateProfile(profileData);
-            return profileData; // Optimistic return or return response.data if it returns updated profile
+            await profileService.updateProfile(profileData);
+
+            // ✅ SYNC: Update global auth state without re-fetching /profile/me
+            const { updateUser } = await import('../auth/authSlice');
+            dispatch(updateUser(profileData));
+
+            return profileData;
         } catch (error) {
             return rejectWithValue(error.response?.data?.detail || 'Failed to update profile');
         }
@@ -158,13 +163,20 @@ export const updateUserProfile = createAsyncThunk(
 // Upload Avatar
 export const uploadUserAvatar = createAsyncThunk(
     'profile/uploadUserAvatar',
-    async (file, { rejectWithValue }) => {
+    async ({ file, localUrl }, { dispatch, rejectWithValue }) => {
         try {
+            // 1. Optimistic Update (Immediate)
+            const { updateUser } = await import('../auth/authSlice');
+            dispatch(updateUser({ profile_url: localUrl }));
+
+            // 2. Background Upload
             const formData = new FormData();
             formData.append('file', file);
-            // Now using the updated service method that expects formData
             const response = await profileService.uploadAvatar(formData);
-            return response.data; // Should return { profile_url: ... }
+
+            // Note: response now contains { status: 'processing', predicted_key: ... }
+            // We keep the localUrl as the source until the next full page refresh or sync
+            return { profile_url: localUrl, ...response.data };
         } catch (error) {
             return rejectWithValue(error.response?.data?.detail || 'Failed to upload avatar');
         }
