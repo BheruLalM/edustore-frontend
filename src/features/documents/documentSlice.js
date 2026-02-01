@@ -243,25 +243,19 @@ const documentSlice = createSlice({
                     };
                 }
 
-                // Update in public feed
-                const publicIndex = state.publicFeed.findIndex(doc => doc.id === documentId);
-                if (publicIndex !== -1) {
-                    state.publicFeed[publicIndex] = {
-                        ...state.publicFeed[publicIndex],
-                        is_liked,
-                        like_count
-                    };
-                }
+                // Update in public feed - create new array
+                state.publicFeed = state.publicFeed.map(doc =>
+                    doc.id === documentId
+                        ? { ...doc, is_liked, like_count }
+                        : doc
+                );
 
-                // Update in following feed
-                const followingIndex = state.followingFeed.findIndex(doc => doc.id === documentId);
-                if (followingIndex !== -1) {
-                    state.followingFeed[followingIndex] = {
-                        ...state.followingFeed[followingIndex],
-                        is_liked,
-                        like_count
-                    };
-                }
+                // Update in following feed - create new array
+                state.followingFeed = state.followingFeed.map(doc =>
+                    doc.id === documentId
+                        ? { ...doc, is_liked, like_count }
+                        : doc
+                );
             })
             // Toggle bookmark
             .addCase(toggleBookmark.fulfilled, (state, action) => {
@@ -275,23 +269,19 @@ const documentSlice = createSlice({
                     };
                 }
 
-                // Update in public feed
-                const publicIndex = state.publicFeed.findIndex(doc => doc.id === documentId);
-                if (publicIndex !== -1) {
-                    state.publicFeed[publicIndex] = {
-                        ...state.publicFeed[publicIndex],
-                        is_bookmarked
-                    };
-                }
+                // Update in public feed - create new array
+                state.publicFeed = state.publicFeed.map(doc =>
+                    doc.id === documentId
+                        ? { ...doc, is_bookmarked }
+                        : doc
+                );
 
-                // Update in following feed
-                const followingIndex = state.followingFeed.findIndex(doc => doc.id === documentId);
-                if (followingIndex !== -1) {
-                    state.followingFeed[followingIndex] = {
-                        ...state.followingFeed[followingIndex],
-                        is_bookmarked
-                    };
-                }
+                // Update in following feed - create new array
+                state.followingFeed = state.followingFeed.map(doc =>
+                    doc.id === documentId
+                        ? { ...doc, is_bookmarked }
+                        : doc
+                );
             });
     },
 });
