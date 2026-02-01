@@ -232,26 +232,26 @@ const documentSlice = createSlice({
             })
             // Toggle like (optimistic update)
             .addCase(toggleLike.fulfilled, (state, action) => {
-                const { documentId, is_liked } = action.payload;
+                const { documentId, is_liked, like_count } = action.payload;
 
                 // Update current document if it matches
                 if (state.currentDocument && state.currentDocument.id === documentId) {
                     state.currentDocument.is_liked = is_liked;
-                    state.currentDocument.like_count += is_liked ? 1 : -1;
+                    state.currentDocument.like_count = like_count;
                 }
 
                 // Update in public feed
                 const publicDoc = state.publicFeed.find(doc => doc.id === documentId);
                 if (publicDoc) {
                     publicDoc.is_liked = is_liked;
-                    publicDoc.like_count += is_liked ? 1 : -1;
+                    publicDoc.like_count = like_count;
                 }
 
                 // Update in following feed
                 const followingDoc = state.followingFeed.find(doc => doc.id === documentId);
                 if (followingDoc) {
                     followingDoc.is_liked = is_liked;
-                    followingDoc.like_count += is_liked ? 1 : -1;
+                    followingDoc.like_count = like_count;
                 }
             })
             // Toggle bookmark
