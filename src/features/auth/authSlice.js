@@ -18,8 +18,10 @@ export const verifyOTP = createAsyncThunk(
     'auth/verifyOTP',
     async ({ email, otp }, { rejectWithValue }) => {
         try {
-            await authService.verifyOTP(email, otp);
-            // After successful login, get user profile
+            const response = await authService.verifyOTP(email, otp);
+            const { access_token, refresh_token } = response.data;
+            localStorage.setItem('access_token', access_token);
+            localStorage.setItem('refresh_token', refresh_token);
             const userResponse = await authService.getCurrentUser();
             return userResponse.data;
         } catch (error) {
@@ -32,7 +34,10 @@ export const googleLogin = createAsyncThunk(
     'auth/googleLogin',
     async (credential, { rejectWithValue }) => {
         try {
-            await authService.googleLogin(credential);
+            const response = await authService.googleLogin(credential);
+            const { access_token, refresh_token } = response.data;
+            localStorage.setItem('access_token', access_token);
+            localStorage.setItem('refresh_token', refresh_token);
             const userResponse = await authService.getCurrentUser();
             return userResponse.data;
         } catch (error) {
@@ -45,9 +50,15 @@ export const checkAuth = createAsyncThunk(
     'auth/checkAuth',
     async (_, { rejectWithValue }) => {
         try {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                return rejectWithValue('Not authenticated');
+            }
             const response = await authService.getCurrentUser();
             return response.data;
         } catch (error) {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
             return rejectWithValue('Not authenticated');
         }
     }
@@ -57,9 +68,13 @@ export const logout = createAsyncThunk(
     'auth/logout',
     async (_, { rejectWithValue }) => {
         try {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
             await authService.logout();
             return null;
         } catch (error) {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
             return rejectWithValue(error.response?.data?.detail || 'Logout failed');
         }
     }

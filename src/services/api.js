@@ -2,34 +2,50 @@ import axios from 'axios';
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL || 'https://edustore-api-1.onrender.com',
-    withCredentials: true, // CRITICAL: Enables HttpOnly cookies
     headers: {
         'Content-Type': 'application/json',
     },
 });
 
-// Response interceptor for handling 401 errors and auto-refresh
+api.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('access_token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
 
-        // If 401 and not already retried, try to refresh
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 
             try {
-                // Attempt token refresh using a clean axios instance to avoid recursion
-                await axios.post(
+                const refreshToken = localStorage.getItem('refresh_token');
+                if (!refreshToken) {
+                    throw new Error('No refresh token');
+                }
+
+                const response = await axios.post(
                     `${import.meta.env.VITE_API_BASE_URL}/auth/refresh`,
-                    {},
-                    { withCredentials: true }
+                    { refresh_token: refreshToken }
                 );
 
-                // Retry original request
+                const { access_token, refresh_token } = response.data;
+                localStorage.setItem('access_token', access_token);
+                localStorage.setItem('refresh_token', refresh_token);
+
+                originalRequest.headers.Authorization = `Bearer ${access_token}`;
                 return api(originalRequest);
             } catch (refreshError) {
-                // Refresh failed, notify the app to handle logout/redirect smoothly
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
                 window.dispatchEvent(new CustomEvent('unauthorized'));
                 return Promise.reject(refreshError);
             }
