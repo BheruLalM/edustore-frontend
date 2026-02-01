@@ -28,6 +28,14 @@ const EditProfileModal = ({ onClose, currentProfile }) => {
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
+            // Validation: 3MB limit
+            const MAX_IMAGE_SIZE = 3 * 1024 * 1024;
+            if (file.size > MAX_IMAGE_SIZE) {
+                toast.error("Profile image must be under 3 MB");
+                e.target.value = null; // Reset input
+                return;
+            }
+
             setSelectedFile(file);
             setAvatarPreview(URL.createObjectURL(file));
         }

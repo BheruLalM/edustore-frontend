@@ -15,6 +15,16 @@ const DocumentUpload = () => {
 
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
+
+        // Validation: 20MB limit
+        const MAX_FILE_SIZE = 20 * 1024 * 1024;
+        if (selectedFile && selectedFile.size > MAX_FILE_SIZE) {
+            toast.error("Document size exceeds 20 MB limit");
+            e.target.value = null; // Reset input
+            setFile(null);
+            return;
+        }
+
         if (selectedFile) {
             setFile(selectedFile);
             if (!title) {
