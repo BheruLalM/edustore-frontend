@@ -36,7 +36,12 @@ const LikeButton = ({ documentId, isLiked, likeCount, className }) => {
         }
 
         try {
-            await dispatch(toggleLike({ documentId, isLiked: optimisticLiked })).unwrap();
+            const result = await dispatch(toggleLike({ documentId, isLiked: optimisticLiked })).unwrap();
+
+            // Sync with authoritative backend count
+            if (result.like_count !== undefined) {
+                setOptimisticCount(result.like_count);
+            }
         } catch (error) {
             // Rollback
             setOptimisticLiked(!newLikedState);
