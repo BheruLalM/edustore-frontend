@@ -13,7 +13,7 @@ const ChatPage = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
-    const { conversations, activeChat } = useSelector((state) => state.chat);
+    const { conversations, activeChat, chatToken } = useSelector((state) => state.chat);
     const [selectedUser, setSelectedUser] = useState(null);
 
     // Get initial user from URL params
@@ -39,13 +39,15 @@ const ChatPage = () => {
     }, [selectedUser]);
 
     useEffect(() => {
-        // Fetch users when page loads
-        dispatch(fetchChatUsers());
+        // Fetch users when token becomes available
+        if (chatToken) {
+            dispatch(fetchChatUsers());
+        }
 
         return () => {
             dispatch(clearActiveChat());
         };
-    }, [dispatch]);
+    }, [dispatch, chatToken]);
 
     useEffect(() => {
         // If initial user is provided, find them in conversations

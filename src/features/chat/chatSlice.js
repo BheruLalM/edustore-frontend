@@ -131,10 +131,23 @@ const chatSlice = createSlice({
             .addCase(fetchChatUsers.fulfilled, (state, action) => {
                 state.conversations = action.payload.users || [];
                 state.unreadCounts = action.payload.unseenMessages || {};
+                state.loading = false;
+            })
+            .addCase(fetchChatUsers.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
             })
             // Fetch messages
+            .addCase(fetchMessages.pending, (state) => {
+                state.loading = true;
+            })
             .addCase(fetchMessages.fulfilled, (state, action) => {
+                state.loading = false;
                 state.messages = action.payload.messages || [];
+            })
+            .addCase(fetchMessages.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
             })
             // Send message
             .addCase(sendMessage.fulfilled, (state, action) => {
