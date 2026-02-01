@@ -16,13 +16,17 @@ export const requestOTP = createAsyncThunk(
 
 export const verifyOTP = createAsyncThunk(
     'auth/verifyOTP',
-    async ({ email, otp }, { rejectWithValue }) => {
+    async ({ email, otp }, { rejectWithValue, dispatch }) => {
         try {
             const response = await authService.verifyOTP(email, otp);
             const { access_token, refresh_token } = response.data;
             localStorage.setItem('access_token', access_token);
             localStorage.setItem('refresh_token', refresh_token);
             const userResponse = await authService.getCurrentUser();
+
+            const { syncToChat } = await import('../chat/chatSlice');
+            await dispatch(syncToChat());
+
             return userResponse.data;
         } catch (error) {
             return rejectWithValue(error.response?.data?.detail || 'Invalid OTP');
@@ -32,13 +36,17 @@ export const verifyOTP = createAsyncThunk(
 
 export const googleLogin = createAsyncThunk(
     'auth/googleLogin',
-    async (credential, { rejectWithValue }) => {
+    async (credential, { rejectWithValue, dispatch }) => {
         try {
             const response = await authService.googleLogin(credential);
             const { access_token, refresh_token } = response.data;
             localStorage.setItem('access_token', access_token);
             localStorage.setItem('refresh_token', refresh_token);
             const userResponse = await authService.getCurrentUser();
+
+            const { syncToChat } = await import('../chat/chatSlice');
+            await dispatch(syncToChat());
+
             return userResponse.data;
         } catch (error) {
             return rejectWithValue(error.response?.data?.detail || 'Google login failed');
