@@ -236,22 +236,31 @@ const documentSlice = createSlice({
 
                 // Update current document if it matches
                 if (state.currentDocument && state.currentDocument.id === documentId) {
-                    state.currentDocument.is_liked = is_liked;
-                    state.currentDocument.like_count = like_count;
+                    state.currentDocument = {
+                        ...state.currentDocument,
+                        is_liked,
+                        like_count
+                    };
                 }
 
                 // Update in public feed
-                const publicDoc = state.publicFeed.find(doc => doc.id === documentId);
-                if (publicDoc) {
-                    publicDoc.is_liked = is_liked;
-                    publicDoc.like_count = like_count;
+                const publicIndex = state.publicFeed.findIndex(doc => doc.id === documentId);
+                if (publicIndex !== -1) {
+                    state.publicFeed[publicIndex] = {
+                        ...state.publicFeed[publicIndex],
+                        is_liked,
+                        like_count
+                    };
                 }
 
                 // Update in following feed
-                const followingDoc = state.followingFeed.find(doc => doc.id === documentId);
-                if (followingDoc) {
-                    followingDoc.is_liked = is_liked;
-                    followingDoc.like_count = like_count;
+                const followingIndex = state.followingFeed.findIndex(doc => doc.id === documentId);
+                if (followingIndex !== -1) {
+                    state.followingFeed[followingIndex] = {
+                        ...state.followingFeed[followingIndex],
+                        is_liked,
+                        like_count
+                    };
                 }
             })
             // Toggle bookmark
@@ -260,19 +269,28 @@ const documentSlice = createSlice({
 
                 // Update current document if it matches
                 if (state.currentDocument && state.currentDocument.id === documentId) {
-                    state.currentDocument.is_bookmarked = is_bookmarked;
+                    state.currentDocument = {
+                        ...state.currentDocument,
+                        is_bookmarked
+                    };
                 }
 
                 // Update in public feed
-                const publicDoc = state.publicFeed.find(doc => doc.id === documentId);
-                if (publicDoc) {
-                    publicDoc.is_bookmarked = is_bookmarked;
+                const publicIndex = state.publicFeed.findIndex(doc => doc.id === documentId);
+                if (publicIndex !== -1) {
+                    state.publicFeed[publicIndex] = {
+                        ...state.publicFeed[publicIndex],
+                        is_bookmarked
+                    };
                 }
 
                 // Update in following feed
-                const followingDoc = state.followingFeed.find(doc => doc.id === documentId);
-                if (followingDoc) {
-                    followingDoc.is_bookmarked = is_bookmarked;
+                const followingIndex = state.followingFeed.findIndex(doc => doc.id === documentId);
+                if (followingIndex !== -1) {
+                    state.followingFeed[followingIndex] = {
+                        ...state.followingFeed[followingIndex],
+                        is_bookmarked
+                    };
                 }
             });
     },
