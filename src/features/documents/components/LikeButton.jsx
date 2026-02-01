@@ -14,9 +14,16 @@ const LikeButton = ({ documentId, isLiked, likeCount, className }) => {
     const [showParticles, setShowParticles] = useState(false);
 
     // Sync state with props when backend data arrives
+    // Sync state with props only when they change significantly
     useEffect(() => {
-        setOptimisticLiked(isLiked);
-        setOptimisticCount(likeCount || 0);
+        // Only update if the prop value is different from our current optimistic state
+        // This prevents stale props from reverting our optimistic update
+        if (isLiked !== undefined) {
+            setOptimisticLiked(isLiked);
+        }
+        if (likeCount !== undefined) {
+            setOptimisticCount(likeCount);
+        }
     }, [isLiked, likeCount]);
 
     const handleLike = async (e) => {

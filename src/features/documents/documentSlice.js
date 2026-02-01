@@ -232,13 +232,15 @@ const documentSlice = createSlice({
             })
             // Toggle like (optimistic update)
             .addCase(toggleLike.fulfilled, (state, action) => {
-                const { documentId, is_liked, like_count } = action.payload;
+                // Handle both snake_case and requested 'liked' property
+                const { documentId, is_liked, liked, like_count } = action.payload;
+                const finalIsLiked = liked !== undefined ? liked : is_liked;
 
                 // Update current document if it matches
                 if (state.currentDocument && state.currentDocument.id === documentId) {
                     state.currentDocument = {
                         ...state.currentDocument,
-                        is_liked,
+                        is_liked: finalIsLiked,
                         like_count
                     };
                 }
@@ -246,14 +248,14 @@ const documentSlice = createSlice({
                 // Update in public feed - create new array
                 state.publicFeed = state.publicFeed.map(doc =>
                     doc.id === documentId
-                        ? { ...doc, is_liked, like_count }
+                        ? { ...doc, is_liked: finalIsLiked, like_count }
                         : doc
                 );
 
                 // Update in following feed - create new array
                 state.followingFeed = state.followingFeed.map(doc =>
                     doc.id === documentId
-                        ? { ...doc, is_liked, like_count }
+                        ? { ...doc, is_liked: finalIsLiked, like_count }
                         : doc
                 );
             })
