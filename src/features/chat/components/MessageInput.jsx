@@ -70,26 +70,26 @@ const MessageInput = ({ userId }) => {
     };
 
     return (
-        <div className="p-4 bg-white dark:bg-gray-800 transition-colors">
+        <div className="p-2 sm:p-4 bg-white dark:bg-slate-900 transition-colors">
             {/* Image Preview */}
             {imagePreview && (
-                <div className="mb-3 relative inline-block">
+                <div className="mb-2 relative inline-block">
                     <img
                         src={imagePreview}
                         alt="Preview"
-                        className="h-24 w-24 object-cover rounded-lg border dark:border-gray-600"
+                        className="h-16 w-16 sm:h-24 sm:w-24 object-cover rounded-lg border dark:border-slate-700"
                     />
                     <button
                         onClick={handleRemoveImage}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                        className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 shadow-sm"
                     >
-                        <X className="h-3 w-3" />
+                        <X className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                     </button>
                 </div>
             )}
 
             {/* Input Area */}
-            <div className="flex items-end space-x-2">
+            <div className="flex items-center space-x-1.5 sm:space-x-3">
                 <input
                     ref={fileInputRef}
                     type="file"
@@ -100,28 +100,30 @@ const MessageInput = ({ userId }) => {
 
                 <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="p-2 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                    className="p-1.5 sm:p-2.5 text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all"
                     aria-label="Attach image"
                 >
-                    <ImageIcon className="h-5 w-5" />
+                    <ImageIcon className="h-5 w-5 sm:h-6 sm:w-6" />
                 </button>
 
-                <textarea
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Type a message..."
-                    rows={1}
-                    className="flex-1 px-4 py-2 border dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none max-h-32 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
-                />
+                <div className="flex-1 relative">
+                    <textarea
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        placeholder="Type a message..."
+                        rows={1}
+                        className="w-full px-3 py-1.5 sm:px-4 sm:py-2.5 border-none rounded-2xl focus:ring-2 focus:ring-indigo-500/50 resize-none max-h-32 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 text-sm sm:text-base leading-tight"
+                    />
+                </div>
 
                 <button
                     onClick={handleSend}
                     disabled={!text.trim() && !imageFile}
-                    className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="p-1.5 sm:p-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-40 disabled:scale-95 transition-all shadow-md active:scale-90"
                     aria-label="Send message"
                 >
-                    <Send className="h-5 w-5" />
+                    <Send className="h-5 w-5 sm:h-6 sm:w-6" />
                 </button>
             </div>
         </div>

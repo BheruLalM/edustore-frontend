@@ -70,16 +70,16 @@ const ChatPage = () => {
     };
 
     return (
-        <div className="flex flex-col h-screen overflow-hidden bg-slate-50 dark:bg-slate-950">
+        <div className="flex flex-col h-[100dvh] overflow-hidden bg-slate-50 dark:bg-slate-950">
             {/* Navbar - Hidden on mobile when chat is selected */}
             <div className={selectedUser ? 'hidden md:block' : ''}>
                 <Navbar />
             </div>
 
             {/* Chat Container */}
-            <div className="flex flex-1 overflow-hidden">
+            <div className="flex flex-1 overflow-hidden relative">
                 {/* User List Sidebar - Desktop */}
-                <div className={`w-full md:w-80 lg:w-96 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-y-auto ${selectedUser ? 'hidden md:block' : ''}`}>
+                <div className={`absolute inset-0 z-20 md:relative md:inset-auto md:z-0 w-full md:w-80 lg:w-96 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-y-auto ${selectedUser ? 'hidden md:block' : 'block'}`}>
                     <UserListSidebar
                         users={conversations}
                         selectedUser={selectedUser}
@@ -88,16 +88,16 @@ const ChatPage = () => {
                 </div>
 
                 {/* Chat Area */}
-                <div className={`flex-1 flex flex-col bg-white dark:bg-slate-900 overflow-hidden ${!selectedUser ? 'hidden md:flex' : ''}`}>
+                <div className={`flex-1 flex flex-col bg-white dark:bg-slate-900 overflow-hidden ${!selectedUser ? 'hidden md:flex' : 'flex'}`}>
                     {selectedUser ? (
                         <>
                             {/* Sticky Chat Header */}
-                            <div className="sticky top-0 z-50 p-3 sm:p-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex items-center space-x-3 flex-shrink-0">
+                            <div className="p-3 sm:p-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex items-center space-x-3 flex-shrink-0">
                                 <motion.button
                                     whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.9 }}
                                     onClick={() => setSelectedUser(null)}
-                                    className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+                                    className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors md:hidden"
                                 >
                                     <ArrowLeft className="h-5 w-5 text-slate-600 dark:text-slate-300" />
                                 </motion.button>
@@ -117,24 +117,24 @@ const ChatPage = () => {
                             </div>
 
                             {/* Scrollable Messages Area */}
-                            <div className="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar bg-slate-50 dark:bg-slate-950">
+                            <div className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950 scroll-smooth">
                                 <MessageList userId={selectedUser._id} />
                             </div>
 
                             {/* Sticky Message Input at Bottom */}
-                            <div className="sticky bottom-0 z-50 border-t border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex-shrink-0">
+                            <div className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
                                 <MessageInput userId={selectedUser._id} />
                             </div>
                         </>
                     ) : (
-                        <div className="flex-1 flex items-center justify-center overflow-hidden">
+                        <div className="flex-1 flex items-center justify-center p-4">
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="text-center p-4 sm:p-8"
+                                className="text-center"
                             >
-                                <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 flex items-center justify-center">
-                                    <MessageCircle className="h-10 w-10 sm:h-12 sm:w-12 text-white" />
+                                <div className="w-16 h-16 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 flex items-center justify-center">
+                                    <MessageCircle className="h-8 w-8 sm:h-12 sm:w-12 text-white" />
                                 </div>
                                 <p className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">Select a conversation</p>
                                 <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">Choose a student from the list to start chatting</p>

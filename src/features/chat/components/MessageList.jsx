@@ -45,7 +45,7 @@ const MessageList = ({ userId }) => {
     }
 
     return (
-        <div className="flex flex-col justify-end min-h-full p-4 space-y-3">
+        <div className="flex flex-col justify-end min-h-full p-3 sm:p-4 space-y-3 sm:space-y-4">
             {messages.map((message, index) => {
                 const isSent = String(message.senderId) === String(currentUserId);
 
@@ -58,9 +58,9 @@ const MessageList = ({ userId }) => {
                         className={`flex ${isSent ? 'justify-end' : 'justify-start'}`}
                     >
                         <div
-                            className={`max-w-[75%] sm:max-w-[70%] rounded-2xl p-3 shadow-sm ${isSent
-                                ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white'
-                                : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700'
+                            className={`max-w-[85%] sm:max-w-[70%] rounded-2xl p-2.5 sm:p-3 shadow-sm ${isSent
+                                ? 'bg-indigo-600 text-white rounded-tr-none'
+                                : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-tl-none'
                                 }`}
                         >
                             {message.image && (
