@@ -12,8 +12,11 @@ const BookmarkButton = ({ documentId, isBookmarked, className }) => {
     const [isAnimating, setIsAnimating] = useState(false);
 
     // Sync state with props when backend data arrives
+    // Sync state with props only when they change significantly
     useEffect(() => {
-        setOptimisticBookmarked(isBookmarked);
+        if (isBookmarked !== undefined) {
+            setOptimisticBookmarked(isBookmarked);
+        }
     }, [isBookmarked]);
 
     const handleBookmark = async (e) => {

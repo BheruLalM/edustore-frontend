@@ -261,27 +261,28 @@ const documentSlice = createSlice({
             })
             // Toggle bookmark
             .addCase(toggleBookmark.fulfilled, (state, action) => {
-                const { documentId, is_bookmarked } = action.payload;
+                const { documentId, is_bookmarked, bookmarked } = action.payload;
+                const finalIsBookmarked = bookmarked !== undefined ? bookmarked : is_bookmarked;
 
                 // Update current document if it matches
                 if (state.currentDocument && state.currentDocument.id === documentId) {
                     state.currentDocument = {
                         ...state.currentDocument,
-                        is_bookmarked
+                        is_bookmarked: finalIsBookmarked
                     };
                 }
 
                 // Update in public feed - create new array
                 state.publicFeed = state.publicFeed.map(doc =>
                     doc.id === documentId
-                        ? { ...doc, is_bookmarked }
+                        ? { ...doc, is_bookmarked: finalIsBookmarked }
                         : doc
                 );
 
                 // Update in following feed - create new array
                 state.followingFeed = state.followingFeed.map(doc =>
                     doc.id === documentId
-                        ? { ...doc, is_bookmarked }
+                        ? { ...doc, is_bookmarked: finalIsBookmarked }
                         : doc
                 );
             });
