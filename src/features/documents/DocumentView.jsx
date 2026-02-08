@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { motion } from 'framer-motion';
 import { fetchDocumentDetails } from './documentSlice';
 import { Document, Page, pdfjs } from 'react-pdf';
-import { Loader2, ArrowLeft, Download, ExternalLink, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Loader2, ArrowLeft, Download, ExternalLink, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
 import LikeButton from './components/LikeButton';
 import BookmarkButton from './components/BookmarkButton';
 import CommentSection from '../comments/CommentSection';
@@ -15,9 +15,8 @@ import toast from 'react-hot-toast';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 
-// ✅ PRODUCTION FIX: Use locally bundled PDF.js worker (no CORS issues)
-// Worker is copied to /assets/ by vite-plugin-static-copy
-pdfjs.GlobalWorkerOptions.workerSrc = '/assets/pdf.worker.min.mjs';
+// Configure PDF worker
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 const DocumentView = () => {
     const { id } = useParams();
@@ -26,14 +25,12 @@ const DocumentView = () => {
 
     const { currentDocument: document, docLoading: loading, error } = useSelector(state => state.documents);
     const [downloadUrl, setDownloadUrl] = useState(null);
-
-    // PDF.js state
     const [numPages, setNumPages] = useState(null);
     const [pageNumber, setPageNumber] = useState(1);
     const [pdfLoading, setPdfLoading] = useState(true);
+
     const [containerWidth, setContainerWidth] = useState(window.innerWidth);
 
-    // Responsive container width for PDF rendering
     useEffect(() => {
         const handleResize = () => setContainerWidth(window.innerWidth);
         window.addEventListener('resize', handleResize);
@@ -51,11 +48,9 @@ const DocumentView = () => {
         }
     }, [document]);
 
-    // PDF.js load success handler
     function onDocumentLoadSuccess({ numPages }) {
         setNumPages(numPages);
         setPdfLoading(false);
-        setPageNumber(1); // Reset to first page
     }
 
     // Loading state
@@ -155,44 +150,15 @@ const DocumentView = () => {
                             isBookmarked={document.is_bookmarked}
                             className="bg-white dark:bg-gray-800 border dark:border-gray-700 shadow-sm px-3 py-1.5 h-auto rounded-lg"
                         />
-                        {!isPost && downloadUrl && (
-                            <button
-                                onClick={async () => {
-                                    try {
-                                        // Fetch the file
-                                        const response = await fetch(downloadUrl);
-                                        const blob = await response.blob();
-
-                                        // Create download link
-                                        const url = window.URL.createObjectURL(blob);
-                                        const link = document.createElement('a');
-                                        link.href = url;
-
-                                        // Set filename with proper extension
-                                        const filename = document.title.endsWith('.pdf')
-                                            ? document.title
-                                            : `${document.title}.pdf`;
-                                        link.download = filename;
-
-                                        // Trigger download
-                                        document.body.appendChild(link);
-                                        link.click();
-
-                                        // Cleanup
-                                        document.body.removeChild(link);
-                                        window.URL.revokeObjectURL(url);
-
-                                        toast.success('Download started!');
-                                    } catch (error) {
-                                        console.error('Download failed:', error);
-                                        toast.error('Download failed. Please try again.');
-                                    }
-                                }}
+                        {!isPost && (
+                            <a
+                                href={downloadUrl}
+                                download
                                 className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
                             >
                                 <Download className="h-4 w-4" />
                                 <span className="hidden sm:inline">Download</span>
-                            </button>
+                            </a>
                         )}
                     </div>
                 </div>
@@ -201,7 +167,6 @@ const DocumentView = () => {
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 overflow-hidden min-h-[400px] mb-8">
                     {isPdf ? (
                         <div className="flex flex-col items-center justify-center p-4 bg-gray-100 dark:bg-gray-900/50 min-h-[600px] relative">
-                            {/* PDF.js Viewer - Stable cross-browser rendering */}
                             {pdfLoading && (
                                 <div className="absolute inset-0 flex items-center justify-center z-10 bg-gray-100/80 dark:bg-gray-900/80">
                                     <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
@@ -211,57 +176,33 @@ const DocumentView = () => {
                             <Document
                                 file={downloadUrl}
                                 onLoadSuccess={onDocumentLoadSuccess}
-                                onLoadError={(error) => {
-                                    console.error('PDF.js Load Error:', error);
-                                    setPdfLoading(false);
-                                }}
-                                loading={
-                                    <div className="flex items-center justify-center h-96">
-                                        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-                                    </div>
-                                }
-                                error={
-                                    <div className="text-center p-8">
-                                        <div className="text-red-500 mb-4">Failed to load PDF.</div>
-                                        <a
-                                            href={downloadUrl}
-                                            download={document.title}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-blue-600 hover:underline"
-                                        >
-                                            Click here to download and view the PDF
-                                        </a>
-                                    </div>
-                                }
+                                loading={<div className="h-96" />}
+                                error={<div className="text-red-500">Failed to load PDF. Please download to view.</div>}
                                 className="max-w-full shadow-lg"
                             >
                                 <Page
                                     pageNumber={pageNumber}
-                                    renderTextLayer={true}
-                                    renderAnnotationLayer={true}
-                                    width={Math.min(containerWidth - 64, 800)}
+                                    renderTextLayer={false}
+                                    renderAnnotationLayer={false}
+                                    width={Math.min(containerWidth - 64, 800)} // Responsive width
                                     className="bg-white"
                                 />
                             </Document>
 
-                            {/* Pagination Controls */}
                             {numPages && (
                                 <div className="mt-4 flex items-center space-x-4 bg-white dark:bg-gray-700 px-4 py-2 rounded-full shadow-sm border dark:border-gray-600">
                                     <button
                                         disabled={pageNumber <= 1}
                                         onClick={() => setPageNumber(p => p - 1)}
-                                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-full disabled:opacity-30 dark:text-white transition-colors"
+                                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-full disabled:opacity-30 dark:text-white"
                                     >
                                         <ChevronLeft className="h-5 w-5" />
                                     </button>
-                                    <span className="text-sm font-medium dark:text-white min-w-[100px] text-center">
-                                        Page {pageNumber} of {numPages}
-                                    </span>
+                                    <span className="text-sm font-medium dark:text-white">Page {pageNumber} of {numPages}</span>
                                     <button
                                         disabled={pageNumber >= numPages}
                                         onClick={() => setPageNumber(p => p + 1)}
-                                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-full disabled:opacity-30 dark:text-white transition-colors"
+                                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-full disabled:opacity-30 dark:text-white"
                                     >
                                         <ChevronRight className="h-5 w-5" />
                                     </button>
