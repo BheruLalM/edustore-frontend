@@ -3,8 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { motion } from 'framer-motion';
 import { fetchDocumentDetails } from './documentSlice';
-import { Document, Page, pdfjs } from 'react-pdf';
-import { Loader2, ArrowLeft, Download, ExternalLink, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
+import { Loader2, ArrowLeft, Download, ExternalLink, AlertCircle } from 'lucide-react';
 import LikeButton from './components/LikeButton';
 import BookmarkButton from './components/BookmarkButton';
 import CommentSection from '../comments/CommentSection';
@@ -12,11 +11,6 @@ import Navbar from '../../components/Navbar';
 import Avatar from '../../components/Avatar';
 import Button from '../../components/Button';
 import toast from 'react-hot-toast';
-import 'react-pdf/dist/Page/AnnotationLayer.css';
-import 'react-pdf/dist/Page/TextLayer.css';
-
-// Configure PDF worker - Use CDN with HTTPS
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 const DocumentView = () => {
     const { id } = useParams();
@@ -25,17 +19,6 @@ const DocumentView = () => {
 
     const { currentDocument: document, docLoading: loading, error } = useSelector(state => state.documents);
     const [downloadUrl, setDownloadUrl] = useState(null);
-    const [numPages, setNumPages] = useState(null);
-    const [pageNumber, setPageNumber] = useState(1);
-    const [pdfLoading, setPdfLoading] = useState(true);
-
-    const [containerWidth, setContainerWidth] = useState(window.innerWidth);
-
-    useEffect(() => {
-        const handleResize = () => setContainerWidth(window.innerWidth);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
 
     useEffect(() => {
         dispatch(fetchDocumentDetails(id));
@@ -47,11 +30,6 @@ const DocumentView = () => {
             setDownloadUrl(document.file_url);
         }
     }, [document]);
-
-    function onDocumentLoadSuccess({ numPages }) {
-        setNumPages(numPages);
-        setPdfLoading(false);
-    }
 
     // Loading state
     if (loading) {
@@ -175,76 +153,36 @@ const DocumentView = () => {
                 {/* Viewer */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 overflow-hidden min-h-[400px] mb-8">
                     {isPdf ? (
-                        <div className="flex flex-col items-center justify-center p-4 bg-gray-100 dark:bg-gray-900/50 min-h-[600px] relative">
-                            {pdfLoading && (
-                                <div className="absolute inset-0 flex items-center justify-center z-10 bg-gray-100/80 dark:bg-gray-900/80">
-                                    <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-                                </div>
-                            )}
-
-                            <Document
-                                file={{
-                                    url: downloadUrl,
-                                    httpHeaders: {
-                                        'Accept': 'application/pdf',
-                                    },
-                                    withCredentials: false,
+                        <div className="w-full h-full min-h-[800px] bg-gray-100 dark:bg-gray-900/50">
+                            {/* Native PDF viewer using iframe - works with Cloudinary image URLs */}
+                            <iframe
+                                src={downloadUrl}
+                                className="w-full h-full min-h-[800px] border-0"
+                                title={document.title}
+                                onError={(e) => {
+                                    console.error('PDF iframe load error:', e);
                                 }}
-                                onLoadSuccess={onDocumentLoadSuccess}
-                                onLoadError={(error) => {
-                                    console.error('PDF Load Error:', error);
-                                    setPdfLoading(false);
-                                }}
-                                loading={<div className="h-96" />}
-                                error={
-                                    <div className="text-center p-8">
-                                        <div className="text-red-500 mb-4">Failed to load PDF preview.</div>
-                                        <a
-                                            href={downloadUrl}
-                                            download={document.title}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-blue-600 hover:underline"
-                                        >
-                                            Click here to download and view the PDF
-                                        </a>
-                                    </div>
-                                }
-                                className="max-w-full shadow-lg"
-                                options={{
-                                    cMapUrl: 'https://unpkg.com/pdfjs-dist@' + pdfjs.version + '/cmaps/',
-                                    cMapPacked: true,
-                                    standardFontDataUrl: 'https://unpkg.com/pdfjs-dist@' + pdfjs.version + '/standard_fonts/',
-                                }}
+                            />
+                            {/* Fallback object tag if iframe fails */}
+                            <object
+                                data={downloadUrl}
+                                type="application/pdf"
+                                className="w-full h-full min-h-[800px] hidden"
+                                aria-label={document.title}
                             >
-                                <Page
-                                    pageNumber={pageNumber}
-                                    renderTextLayer={false}
-                                    renderAnnotationLayer={false}
-                                    width={Math.min(containerWidth - 64, 800)} // Responsive width
-                                    className="bg-white"
-                                />
-                            </Document>
-
-                            {numPages && (
-                                <div className="mt-4 flex items-center space-x-4 bg-white dark:bg-gray-700 px-4 py-2 rounded-full shadow-sm border dark:border-gray-600">
-                                    <button
-                                        disabled={pageNumber <= 1}
-                                        onClick={() => setPageNumber(p => p - 1)}
-                                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-full disabled:opacity-30 dark:text-white"
+                                <div className="text-center p-8">
+                                    <div className="text-red-500 mb-4">Failed to load PDF preview.</div>
+                                    <a
+                                        href={downloadUrl}
+                                        download={document.title}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-600 hover:underline"
                                     >
-                                        <ChevronLeft className="h-5 w-5" />
-                                    </button>
-                                    <span className="text-sm font-medium dark:text-white">Page {pageNumber} of {numPages}</span>
-                                    <button
-                                        disabled={pageNumber >= numPages}
-                                        onClick={() => setPageNumber(p => p + 1)}
-                                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-full disabled:opacity-30 dark:text-white"
-                                    >
-                                        <ChevronRight className="h-5 w-5" />
-                                    </button>
+                                        Click here to download and view the PDF
+                                    </a>
                                 </div>
-                            )}
+                            </object>
                         </div>
                     ) : isImage ? (
                         <div className="flex items-center justify-center bg-black/5 dark:bg-black/20 p-4">
