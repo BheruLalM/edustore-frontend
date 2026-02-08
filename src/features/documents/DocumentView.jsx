@@ -166,45 +166,80 @@ const DocumentView = () => {
                 {/* Viewer */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 overflow-hidden min-h-[400px] mb-8">
                     {isPdf ? (
-                        <div className="flex flex-col items-center justify-center p-4 bg-gray-100 dark:bg-gray-900/50 min-h-[600px] relative">
-                            {pdfLoading && (
-                                <div className="absolute inset-0 flex items-center justify-center z-10 bg-gray-100/80 dark:bg-gray-900/80">
-                                    <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+                        <div className="flex flex-col items-center justify-center p-4 bg-gray-100 dark:bg-gray-900/50 min-h-[600px] relative w-full">
+                            {pdfLoading && !numPages && (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-gray-100/90 dark:bg-gray-900/90">
+                                    <Loader2 className="h-10 w-10 animate-spin text-indigo-600 mb-4" />
+                                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Loading viewer...</p>
                                 </div>
                             )}
 
-                            <Document
-                                file={downloadUrl}
-                                onLoadSuccess={onDocumentLoadSuccess}
-                                loading={<div className="h-96" />}
-                                error={<div className="text-red-500">Failed to load PDF. Please download to view.</div>}
-                                className="max-w-full shadow-lg"
-                            >
-                                <Page
-                                    pageNumber={pageNumber}
-                                    renderTextLayer={false}
-                                    renderAnnotationLayer={false}
-                                    width={Math.min(containerWidth - 64, 800)} // Responsive width
-                                    className="bg-white"
-                                />
-                            </Document>
+                            {/* Main PDF.js Viewer */}
+                            <div className={`w-full flex justify-center ${pdfLoading && !numPages ? 'hidden' : 'block'}`}>
+                                <Document
+                                    file={document.file_url}
+                                    onLoadSuccess={onDocumentLoadSuccess}
+                                    onLoadError={() => setPdfLoading(false)}
+                                    loading={<div className="h-96" />}
+                                    error={
+                                        <div className="flex flex-col items-center p-8 text-center">
+                                            <AlertCircle className="h-12 w-12 text-amber-500 mb-4" />
+                                            <p className="text-gray-900 dark:text-gray-100 font-medium mb-4">
+                                                Enhanced viewer unavailable.
+                                            </p>
+                                            <a
+                                                href={document.preview_url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-indigo-600 dark:text-indigo-400 font-medium hover:underline flex items-center gap-2"
+                                            >
+                                                <ExternalLink className="h-4 w-4" />
+                                                Open Native Preview
+                                            </a>
+                                        </div>
+                                    }
+                                    className="max-w-full shadow-lg"
+                                >
+                                    <Page
+                                        pageNumber={pageNumber}
+                                        renderTextLayer={true}
+                                        renderAnnotationLayer={true}
+                                        width={Math.min(containerWidth - 64, 800)}
+                                        className="bg-white"
+                                    />
+                                </Document>
+                            </div>
+
+                            {/* Initial/Fallback Preview (Cloudinary Native pg_1) */}
+                            {pdfLoading && !numPages && document.preview_url && (
+                                <div className="w-full h-[700px] bg-white rounded-lg shadow-inner overflow-hidden">
+                                    <iframe
+                                        src={`${document.preview_url}#toolbar=0&navpanes=0&scrollbar=0`}
+                                        className="w-full h-full border-none"
+                                        title="Quick Preview"
+                                    />
+                                </div>
+                            )}
 
                             {numPages && (
-                                <div className="mt-4 flex items-center space-x-4 bg-white dark:bg-gray-700 px-4 py-2 rounded-full shadow-sm border dark:border-gray-600">
+                                <div className="mt-6 flex items-center space-x-6 bg-white dark:bg-gray-800 px-6 py-3 rounded-full shadow-md border dark:border-gray-700">
                                     <button
                                         disabled={pageNumber <= 1}
                                         onClick={() => setPageNumber(p => p - 1)}
-                                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-full disabled:opacity-30 dark:text-white"
+                                        className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full disabled:opacity-30 dark:text-white transition-colors"
                                     >
-                                        <ChevronLeft className="h-5 w-5" />
+                                        <ChevronLeft className="h-6 w-6" />
                                     </button>
-                                    <span className="text-sm font-medium dark:text-white">Page {pageNumber} of {numPages}</span>
+                                    <div className="flex flex-col items-center">
+                                        <span className="text-sm font-bold dark:text-white">Page {pageNumber}</span>
+                                        <span className="text-[10px] text-gray-500 uppercase tracking-wider">of {numPages}</span>
+                                    </div>
                                     <button
                                         disabled={pageNumber >= numPages}
                                         onClick={() => setPageNumber(p => p + 1)}
-                                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-full disabled:opacity-30 dark:text-white"
+                                        className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full disabled:opacity-30 dark:text-white transition-colors"
                                     >
-                                        <ChevronRight className="h-5 w-5" />
+                                        <ChevronRight className="h-6 w-6" />
                                     </button>
                                 </div>
                             )}
