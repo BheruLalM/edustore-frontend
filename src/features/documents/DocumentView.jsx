@@ -15,8 +15,8 @@ import toast from 'react-hot-toast';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 
-// Configure PDF worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+// Configure PDF worker - Use CDN with HTTPS
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 const DocumentView = () => {
     const { id } = useParams();
@@ -150,11 +150,20 @@ const DocumentView = () => {
                             isBookmarked={document.is_bookmarked}
                             className="bg-white dark:bg-gray-800 border dark:border-gray-700 shadow-sm px-3 py-1.5 h-auto rounded-lg"
                         />
-                        {!isPost && (
+                        {!isPost && downloadUrl && (
                             <a
                                 href={downloadUrl}
-                                download
+                                download={document.title}
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                                onClick={(e) => {
+                                    // For PDFs, open in new tab for preview, or force download
+                                    if (isPdf) {
+                                        // Let the default behavior handle it
+                                        return;
+                                    }
+                                }}
                             >
                                 <Download className="h-4 w-4" />
                                 <span className="hidden sm:inline">Download</span>
@@ -174,11 +183,39 @@ const DocumentView = () => {
                             )}
 
                             <Document
-                                file={downloadUrl}
+                                file={{
+                                    url: downloadUrl,
+                                    httpHeaders: {
+                                        'Accept': 'application/pdf',
+                                    },
+                                    withCredentials: false,
+                                }}
                                 onLoadSuccess={onDocumentLoadSuccess}
+                                onLoadError={(error) => {
+                                    console.error('PDF Load Error:', error);
+                                    setPdfLoading(false);
+                                }}
                                 loading={<div className="h-96" />}
-                                error={<div className="text-red-500">Failed to load PDF. Please download to view.</div>}
+                                error={
+                                    <div className="text-center p-8">
+                                        <div className="text-red-500 mb-4">Failed to load PDF preview.</div>
+                                        <a
+                                            href={downloadUrl}
+                                            download={document.title}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-600 hover:underline"
+                                        >
+                                            Click here to download and view the PDF
+                                        </a>
+                                    </div>
+                                }
                                 className="max-w-full shadow-lg"
+                                options={{
+                                    cMapUrl: 'https://unpkg.com/pdfjs-dist@' + pdfjs.version + '/cmaps/',
+                                    cMapPacked: true,
+                                    standardFontDataUrl: 'https://unpkg.com/pdfjs-dist@' + pdfjs.version + '/standard_fonts/',
+                                }}
                             >
                                 <Page
                                     pageNumber={pageNumber}
