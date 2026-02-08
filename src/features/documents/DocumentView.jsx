@@ -15,8 +15,9 @@ import toast from 'react-hot-toast';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 
-// Configure PDF.js worker for stable PDF rendering
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+// ✅ PRODUCTION FIX: Use locally bundled PDF.js worker (no CORS issues)
+// Worker is copied to /assets/ by vite-plugin-static-copy
+pdfjs.GlobalWorkerOptions.workerSrc = '/assets/pdf.worker.min.mjs';
 
 const DocumentView = () => {
     const { id } = useParams();
