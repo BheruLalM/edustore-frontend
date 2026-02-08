@@ -156,23 +156,43 @@ const DocumentView = () => {
                             className="bg-white dark:bg-gray-800 border dark:border-gray-700 shadow-sm px-3 py-1.5 h-auto rounded-lg"
                         />
                         {!isPost && downloadUrl && (
-                            <a
-                                href={downloadUrl}
-                                download={document.title}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
-                                onClick={(e) => {
-                                    // For PDFs, open in new tab for preview, or force download
-                                    if (isPdf) {
-                                        // Let the default behavior handle it
-                                        return;
+                            <button
+                                onClick={async () => {
+                                    try {
+                                        // Fetch the file
+                                        const response = await fetch(downloadUrl);
+                                        const blob = await response.blob();
+
+                                        // Create download link
+                                        const url = window.URL.createObjectURL(blob);
+                                        const link = document.createElement('a');
+                                        link.href = url;
+
+                                        // Set filename with proper extension
+                                        const filename = document.title.endsWith('.pdf')
+                                            ? document.title
+                                            : `${document.title}.pdf`;
+                                        link.download = filename;
+
+                                        // Trigger download
+                                        document.body.appendChild(link);
+                                        link.click();
+
+                                        // Cleanup
+                                        document.body.removeChild(link);
+                                        window.URL.revokeObjectURL(url);
+
+                                        toast.success('Download started!');
+                                    } catch (error) {
+                                        console.error('Download failed:', error);
+                                        toast.error('Download failed. Please try again.');
                                     }
                                 }}
+                                className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
                             >
                                 <Download className="h-4 w-4" />
                                 <span className="hidden sm:inline">Download</span>
-                            </a>
+                            </button>
                         )}
                     </div>
                 </div>
