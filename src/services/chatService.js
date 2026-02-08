@@ -13,6 +13,16 @@ export const syncUser = async () => {
 };
 
 /**
+ * Sync a target user (the person being messaged)
+ */
+export const syncTargetUser = async (userData) => {
+    const response = await api.post('/api/auth/sync', userData, {
+        baseURL: CHAT_API_URL // Communicate directly with chat service
+    });
+    return response.data;
+};
+
+/**
  * Get list of users for chat sidebar
  */
 export const getUsers = async (chatToken) => {

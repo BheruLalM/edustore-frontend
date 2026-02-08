@@ -42,6 +42,21 @@ export const fetchChatUsers = createAsyncThunk(
     }
 );
 
+/**
+ * Ensures a target user exists in chat DB before starting conversation
+ */
+export const resolveTargetUser = createAsyncThunk(
+    'chat/resolveTargetUser',
+    async (userData, { rejectWithValue }) => {
+        try {
+            const response = await chatService.syncTargetUser(userData);
+            return response.userData;
+        } catch (error) {
+            return rejectWithValue('Failed to resolve target user');
+        }
+    }
+);
+
 // Async thunk to get messages
 export const fetchMessages = createAsyncThunk(
     'chat/fetchMessages',

@@ -11,10 +11,15 @@ const UserListSidebar = ({ users, selectedUser, onUserSelect }) => {
     const { onlineUsers, unreadCounts } = useSelector((state) => state.chat);
 
     // Filter users based on search query
-    const filteredUsers = users.filter((user) =>
+    let filteredUsers = users.filter((user) =>
         user.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.email?.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+    // If we have a selectedUser that isn't in the list (new conversation), prepend them
+    if (selectedUser && !filteredUsers.find(u => u._id === selectedUser._id)) {
+        filteredUsers = [selectedUser, ...filteredUsers];
+    }
 
     return (
         <div className="flex flex-col h-full bg-white dark:bg-slate-900 transition-colors">

@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, MessageCircle, Home } from 'lucide-react';
-import { fetchChatUsers, setActiveChat, clearActiveChat } from './chatSlice';
+import { fetchChatUsers, setActiveChat, clearActiveChat, resolveTargetUser } from './chatSlice';
 import UserListSidebar from './components/UserListSidebar';
 import MessageList from './components/MessageList';
 import MessageInput from './components/MessageInput';
@@ -50,19 +50,36 @@ const ChatPage = () => {
     }, [dispatch, chatToken]);
 
     useEffect(() => {
-        // If initial user is provided, find them in conversations
-        if (initialUserId && conversations.length > 0) {
+        const initializeChat = async () => {
+            if (!initialUserId) return;
+
+            // 1. Try to find in existing conversations
             const userInChat = conversations.find(u => String(u.postgresId) === String(initialUserId));
+
             if (userInChat) {
                 setSelectedUser(userInChat);
                 dispatch(setActiveChat(userInChat._id));
-            } else if (!selectedUser) {
-                // Handle case where user is not in conversations yet
-                setSelectedUser({ _id: initialUserId, postgresId: initialUserId, fullName: initialUserName, email: initialUserEmail });
-                dispatch(setActiveChat(initialUserId));
+            } else if (initialUserName && initialUserEmail) {
+                // 2. Not found, but we have details -> Resolve/Sync with Chat DB
+                try {
+                    const resolvedUser = await dispatch(resolveTargetUser({
+                        postgresId: initialUserId,
+                        fullName: initialUserName,
+                        email: initialUserEmail
+                    })).unwrap();
+
+                    setSelectedUser(resolvedUser);
+                    dispatch(setActiveChat(resolvedUser._id));
+                } catch (error) {
+                    console.error("Failed to resolve user:", error);
+                }
             }
+        };
+
+        if (chatToken) {
+            initializeChat();
         }
-    }, [initialUserId, initialUserName, initialUserEmail, conversations, dispatch, selectedUser]);
+    }, [initialUserId, initialUserName, initialUserEmail, conversations.length, chatToken, dispatch]);
 
     const handleUserSelect = (user) => {
         setSelectedUser(user);
